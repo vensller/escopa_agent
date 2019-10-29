@@ -3,7 +3,7 @@
 /* Initial beliefs and rules */
 mycards([]).
 tablecards([]).
-availablecards([]).
+cardsused([]).
 
 /* Initial goals */
 !start.
@@ -24,7 +24,10 @@ availablecards([]).
 	?tablecards(X);
 	-tablecards(X);
 	.delete(card(NAIPE,NUMBER),X,X2);	
-	+tablecards(X2);	
+	+tablecards(X2);
+	?cardsused(Y);
+	-cardsused(Y);
+	+cardsused([card(NAIPE,NUMBER)|Y]);	
 	.
 
 +hand(card(NAIPE,NUMBER)):
@@ -35,25 +38,18 @@ availablecards([]).
 	+mycards([card(NAIPE,NUMBER)|X]);
 	.
 
--hand(card(NAIPE,NUMBER)):
-	true
-	<-
-	?mycards(X);
-	-mycards(X);
-	.delete(card(NAIPE,NUMBER),X,X2);
-	+mycards(X2);
-	.
-
 +!start : 
 	true 
-	<- 
+	<-
 	join;
 	.
 
 +playerturn(AG) :
-	.my_name(AG) & mycards(X)
+	.my_name(AG) & mycards([card(NAIPE,NUMBER)|T])
 	<-
-	.print(X);
+	-mycards([card(NAIPE,NUMBER)|T]);	
+	+mycards(T);
+	dropcard(NAIPE,NUMBER);
 	.
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
