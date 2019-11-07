@@ -24,7 +24,7 @@ The delay time is the only one parameter of the constructor.
 
 1 - Sempre que conseguir fazer 15 pontos, recolher as cartas.
 2 - Sempre que for jogar cartas na mesa, não jogar 6 e 7, jogar as maiores se tiver muitos pontos na mesa ou jogar as menores se tiverem poucos pontos na mesa.
-3 - Descartar primeiro as cartas que não são de ouros. Descartar cartas que são de ouros caso outras cartas facilitem a acontecer escova.
+3 - Descartar primeiro as cartas que não são de ouros. Descartar cartas que são de ouros caso outras cartas facilitem a acontecer escopa.
 4 - Anotar todas as cartas que foram utilizadas e as que estiverem em jogo para ponderar com os itens 2 e 3.
 
 

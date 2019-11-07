@@ -30,7 +30,15 @@ createcollectlist([card(NAIPE,NUMBER)|T], MYVALUE, TOTALVALUE, CONTROLLIST, LIST
 												  						  		   CONTROLLIST = [card(NAIPE,NUMBER)|L2] &
 												  						  		   getnumber(NUMBER,VALUE) &
 												  						  		   TOTALVALUE=VALUE + V2 &
-												  						  		   LIST=[].												  						  		   
+												  						  		   LIST=[].
+
+getseteouros([],CARD):-false.
+getseteouros([card(NAIPE,NUMBER)|T],CARD):-NAIPE=coin & NUMBER=7 & CARD=card(NAIPE,NUMBER).
+getseteouros([card(NAIPE,NUMBER)|T],CARD):-getseteouros(T,X).
+
+getmaiorouros([],CARD):-false.
+
+getqualquer([card(NAIPE,NUMBER)|T],CARD):-CARD=card(NAIPE,NUMBER).					  		   
 
 /* Initial goals */
 !start.
@@ -64,14 +72,8 @@ createcollectlist([card(NAIPE,NUMBER)|T], MYVALUE, TOTALVALUE, CONTROLLIST, LIST
 	-mycards(X);
 	+mycards([card(NAIPE,NUMBER)|X]);
 	.
-
-+!start : 
-	true 
-	<-
-	join;
-	.
-
-+removecardfromhand(CARD) :
+	
++!removecardfromhand(CARD) :
 	true
 	<-
 	?mycards(MYCARDS);
@@ -80,23 +82,70 @@ createcollectlist([card(NAIPE,NUMBER)|T], MYVALUE, TOTALVALUE, CONTROLLIST, LIST
 	+mycards(NEWCARDS);
 	.
 
-//Quando não existirem cartas a serem recolhidas
-+playerturn(AG):
-	.my_name(AG) & getcard(CARD) & tablecards(X) & countPoints([CARD|X],POINTS) & collectlist([CARD|X],POINTS,COLLECT) & (COLLECT == [])
+//+!drophand(card(NAIPE,NUMBER)):
+//	collectlist(card(NAIPE,NUMBER),LIST)
+//	<-
+//	!removecardfromhand(card(NAIPE,NUMBER));
+//	collectcards(card(NAIPE,NUMBER), LIST);
+//	.
+
++!drophand(card(NAIPE,NUMBER)):
+	true
 	<-
-	+removecardfromhand(CARD);
-	?carddata(CARD, NAIPE, NUMBER);
+	!removecardfromhand(card(NAIPE,NUMBER));
 	dropcard(NAIPE,NUMBER);
 	.
 
-//Quando tiver cartas para recolher
-+playerturn(AG):
-	.my_name(AG) & getcard(CARD) & tablecards(X) & countPoints([CARD|X],POINTS) & collectlist([CARD|X],POINTS,COLLECT) & (not (COLLECT == []))
++!play(MYCARDS):
+	getseteouros(MYCARDS, card(NAIPE,NUMBER))
 	<-
-	?tablecards(TABLE);
-	+removecardfromhand(CARD);		
-	collectcards(CARD, COLLECT);
+	.print(ouros, NAIPE,NUMBER);
+	!drophand(card(NAIPE,NUMBER));
 	.
+	
++!play(MYCARDS):
+	getmaiorouros(MYCARDS, card(NAIPE,NUMBER))
+	<-
+	.print(maiorouros, NAIPE,NUMBER);
+	!drophand(card(NAIPE,NUMBER));
+	.
+
++!play(MYCARDS):
+	getqualquer(MYCARDS, card(NAIPE,NUMBER))
+	<-
+	.print(qualquer, NAIPE,NUMBER);
+	!drophand(card(NAIPE,NUMBER));
+	.
+
++!start : 
+	true 
+	<-
+	join;
+	.
+
++playerturn(AG):
+	.my_name(AG)
+	<-
+	?mycards(X);
+	!play(X);
+	.
+
+//+playerturn(AG):
+//	.my_name(AG) & getcard(CARD) & tablecards(X) & countPoints([CARD|X],POINTS) & collectlist([CARD|X],POINTS,COLLECT) & (COLLECT == [])
+//	<-
+//	+removecardfromhand(CARD);
+//	?carddata(CARD, NAIPE, NUMBER);
+//	dropcard(NAIPE,NUMBER);
+//	.
+//
+////Quando tiver cartas para recolher
+//+playerturn(AG):
+//	.my_name(AG) & getcard(CARD) & tablecards(X) & countPoints([CARD|X],POINTS) & collectlist([CARD|X],POINTS,COLLECT) & (not (COLLECT == []))
+//	<-
+//	?tablecards(TABLE);
+//	+removecardfromhand(CARD);		
+//	collectcards(CARD, COLLECT);
+//	.
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
 
