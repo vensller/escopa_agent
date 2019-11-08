@@ -4,6 +4,7 @@ import fails.CardNotFounded;
 import fails.CollectException;
 import fails.DropException;
 import jason.asSyntax.ASSyntax;
+import jason.asSyntax.parser.ParseException;
 
 public class Escopa extends Artifact {
 	int DELAY;
@@ -57,7 +58,7 @@ public class Escopa extends Artifact {
 	
 	
 	@OPERATION
-	void collectcards(String card, Object[] cards) {
+	void collectcards(String card, Object[] cards) throws ParseException {
 		
 		Card [] tCards = new Card[cards.length];
 		for (int i=0;i<cards.length;i++) 
@@ -96,8 +97,13 @@ public class Escopa extends Artifact {
 				e.printStackTrace();
 			}
 		}
+			
 		view.removeHandCard(this.match.getCurrentPlayer(),
-							hCard.getNaipe(), hCard.getNumber());				
+							hCard.getNaipe(), hCard.getNumber());
+		signal("cardusedtocollect", 
+				ASSyntax.parseLiteral(this.match.getCurrentPlayerId().getAgentName()),
+				ASSyntax.parseLiteral(hCard.getNaipe()), 
+				hCard.getNumber());
 		//check escova
 		if (escopa) {
 			this.view.showMessage(

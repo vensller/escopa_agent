@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 public class View extends JFrame 
 {
 		private ViewCards table = 	   new ViewCards(2		, 7, 
-													 220	, 5,
+													 150	, 5,
 													 "cardpics/", 
 													 new Color(79,199,120),
 													 Color.RED,
