@@ -1,5 +1,5 @@
 mas espanhol {
-    agent sample_agent {
+    agent pablo_escopar {
     	instances: 2
 		join: env
 		focus: env.v

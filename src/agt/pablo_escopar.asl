@@ -1,13 +1,8 @@
 // Agent sample_agent in project escopa_project
 
 /* Initial beliefs and rules */
-mycards([]).
-cardstable([]).
-cardsused([]).
 
 //getcard(X):-mycards([H|T]) & X=H.
-//carddata(card(NAIPE,NUMBER), NP, NB):-NP=NAIPE & NB=NUMBER.
-
 //collectlist([card(NAIPE,NUMBER)|T], POINTS, COLLECT):-(POINTS < 15) & COLLECT=[].
 //collectlist([card(NAIPE,NUMBER)|T], POINTS, COLLECT):-(POINTS >= 15) & getnumber(NUMBER,VALUE) & createcollectlist(T,VALUE,_,_,COLLECT).
 //
@@ -26,18 +21,22 @@ cardsused([]).
 //												  						  		   TOTALVALUE=VALUE + V2 &
 //												  						  		   LIST=[].
 
-//countPoints([card(NAIPE,NUMBER)|[]], POINTS):-getnumber(NUMBER,POINTS).
-//countPoints([card(NAIPE,NUMBER)|T], POINTS):-getnumber(NUMBER,VALUE) & countPoints(T,P2) & POINTS=VALUE + P2.
-
 //escopa(TOTAL, [card(NP1,N1)|[]],R):-TOTAL+N1=15 & R=card(NP1,N1).
 //escopa(TOTAL, [card(NP1,N1)|[]],R):-TOTAL+N1\==15 & R=false.
 //escopa(TOTAL, [card(NP1,N1)|T],R):-escopa(TOTAL,T,R1) & R1\== false & R=R1.
 //escopa(TOTAL, [card(NP1,N1)|T],R):-escopa(TOTAL,T,R1) & R1=false & TOTAL+N1=15 & R=card(NP1,N1).
 //escopa(TOTAL, [card(NP1,N1)|T],R):-escopa(TOTAL,T,R1) & TOTAL+N1\==15 & R=false.
+mycards([]).
+cardstable([]).
+cardsused([]).
+
+carddata(card(NAIPE,NUMBER), NP, NB):-NP=NAIPE & NB=NUMBER.
 
 getnumber(NUMBER,X):-NUMBER >= 10 & X=NUMBER - 2.
 getnumber(NUMBER,X):-NUMBER < 10 & X=NUMBER.
 
+countpoints([card(NAIPE,NUMBER)|[]], POINTS):-getnumber(NUMBER,POINTS).
+countpoints([card(NAIPE,NUMBER)|T], POINTS):-getnumber(NUMBER,VALUE) & countpoints(T,P2) & POINTS=VALUE + P2.
 
 collect(TABLECARDS, R):-
 	mycards(CARDS) &	
@@ -61,10 +60,13 @@ montar_lista(TABLECARDS, L, S, R):-
 	.
 
 getseteouros([],CARD):-false.
-getseteouros([card(NAIPE,NUMBER)|T],CARD):-NAIPE=coin & NUMBER=7 & CARD=card(NAIPE,NUMBER).
+getseteouros([card(NAIPE,NUMBER)|T],CARD):-NAIPE=coins & NUMBER=7 & CARD=card(NAIPE,NUMBER).
 getseteouros([card(NAIPE,NUMBER)|T],CARD):-getseteouros(T,X).
 
-getmaiorouros([],CARD):-false.
+getmaiorouros([card(NAIPE,NUMBER)|[]],CARD):-CARD=card(NAIPE,NUMBER).
+getmaiorouros([card(coins,NUMBER)|T],CARD):-getseteouros(T,card(coins,NB)) & NUMBER > NB & CARD=card(coins,NUMBER).
+getmaiorouros([card(coins,NUMBER)|T],CARD):-getseteouros(T,card(NP,NB)) & CARD=card(coins,NUMBER).
+getmaiorouros([card(NAIPE,NUMBER)|T],CARD):-getmaiorouros(T,X) & CARD=X.
 
 getqualquer([card(NAIPE,NUMBER)|T],CARD):-CARD=card(NAIPE,NUMBER).
 
@@ -72,14 +74,37 @@ desmembrarlista([], L, C):-false.
 desmembrarlista([card(NAIPE,NUMBER)|[]], L, C):-C=card(NAIPE,NUMBER) & L=[].
 desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[card(NAIPE,NUMBER)|L2]. 
 
+getmaiorcard([card(NAIPE,NUMBER)|[]],CARD):-CARD=card(NAIPE,NUMBER).
+getmaiorcard([card(NAIPE,NUMBER)|T],CARD):-getmaiorcard(T, card(NP,NB)) & NB > NUMBER & CARD=card(NP,NB).
+getmaiorcard([card(NAIPE,NUMBER)|T],CARD):-getmaiorcard(T, card(NP,NB)) & NB < NUMBER & CARD=card(NAIPE,NUMBER).
+
+getmaiorcardnotsixsete(MYCARDS,CARD):-getmaiorcard(MYCARDS,card(NAIPE,NUMBER)) & (NUMBER < 6 | NUMBER > 7) & CARD=card(NAIPE,NUMBER).
+getmaiorcardnotsixsete(MYCARDS,CARD):-false. 
+
+getmaiorcardnotsixsetenaocoins(MYCARDS,CARD):-getmaiorcardnotsixsete(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
+getmaiorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
+
+getmenorcard([card(NAIPE,NUMBER)|[]],CARD):-CARD=card(NAIPE,NUMBER).
+getmenorcard([card(NAIPE,NUMBER)|T],CARD):-getmenorcard(T, card(NP,NB)) & NB < NUMBER & CARD=card(NP,NB).
+getmenorcard([card(NAIPE,NUMBER)|T],CARD):-getmenorcard(T, card(NP,NB)) & NB > NUMBER & CARD=card(NAIPE,NUMBER).
+
+getmenorcardnotsixsete(MYCARDS,CARD):-getmenorcard(MYCARDS,card(NAIPE,NUMBER)) & (NUMBER < 6 | NUMBER > 7) & CARD=card(NAIPE,NUMBER).
+getmenorcardnotsixsete(MYCARDS,CARD):-false.
+
+getmenorcardnotsixsete(MYCARDS,CARD):-getmenorcard(MYCARDS,card(NAIPE,NUMBER)) & (NUMBER < 6 | NUMBER > 7) & CARD=card(NAIPE,NUMBER).
+getmenorcardnotsixsete(MYCARDS,CARD):-false.
+
+getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-getmenorcardnotsixsete(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
+getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
+
 /* Initial goals */
 !start.
 
 /* Plans */
 
-// Tentar fazer 15 pontos com as cartas de ouros, testando o 7 de ouros por primeiro
+// Tentar fazer 15 pontos com 7 de ouros
 +!play(MYCARDS, TABLECARDS):
-	(getseteouros(MYCARDS, CARD) | getmaiorouros(MYCARDS, CARD)) &	 
+	getseteouros(MYCARDS, CARD) &	 
 	collectcomcard(TABLECARDS, CARD, R) &		
 	desmembrarlista(R, L, C) 
 	<-
@@ -88,7 +113,19 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 	collectcards(C,L);	
 	.
 	
-//Quando não conseguir fazer 15 pontos com cartes de ouros, tentar com as outras
+// Tentar fazer 15 pontos com qualquer carta de ouros
++!play(MYCARDS, TABLECARDS):
+	getmaiorouros(MYCARDS, card(NAIPE,NUMBER)) &
+	NAIPE=coins &		
+	collectcomcard(TABLECARDS, card(NAIPE,NUMBER), R) &		
+	desmembrarlista(R, L, C) 
+	<-
+	.print(comouros, R);	
+	!removecardfromhand(C);	
+	collectcards(C,L);	
+	.	 
+	
+//Quando não conseguir fazer 15 pontos com cartas de ouros, tentar com as outras
 +!play(MYCARDS, TABLECARDS):
 	collect(TABLECARDS, R) &
 	desmembrarlista(R, L, C) 
@@ -98,19 +135,53 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 	collectcards(C,L);		
 	.
 
-//Não jogar 6 e 7 na mesa se tiver outra possibilidade
+//Jogar maior carta na mesa (quando a soma de pontos na mesa for > 7) *** NÃO PODE JOGAR 7 E 6 E NÃO JOGAR OUROS***
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) & 
+	POINTS > 7 &
+	getmaiorcardnotsixsetenaocoins(MYCARDS, CARD)
+	<-
+	.print(maiornaocoins, CARD);
+	!drophand(CARD);
+	.
+
+//Jogar menor carta na mesa (quando a soma de pontos na mesa for <= 7) *** NÃO PODE JOGAR 7 E 6 E NÃO JOGAR OUROS***
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) &
+	POINTS <= 7 &
+	getmenorcardnotsixsetenaocoins(MYCARDS, CARD)
+	<-
+	.print(menornaocoins, CARD);
+	!drophand(CARD);
+	.
+
+//Jogar maior carta na mesa (quando a soma de pontos na mesa for > 7) *** NÃO PODE JOGAR 7 E 6 ***
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) & 
+	POINTS > 7 &
+	getmaiorcardnotsixsete(MYCARDS, CARD)
+	<-
+	.print(maior, CARD);
+	!drophand(CARD);
+	.
+	
+//Jogar menor carta na mesa (quando a soma de pontos na mesa for <= 7) *** NÃO PODE JOGAR 7 E 6 ***
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) &
+	POINTS <= 7 &
+	getmenorcardnotsixsete(MYCARDS, CARD)
+	<-
+	.print(menor, CARD);
+	!drophand(CARD);
+	.
+
+//Jogar qualquer
 +!play(MYCARDS, TABLECARDS):
 	getqualquer(MYCARDS, CARD)
 	<-
 	.print(descartarqualquer, CARD);
 	!drophand(CARD);
 	.
-
-//Jogar 6 na mesa
-
-
-//Jogar a desgraça do 7 fora já que n tem outra possibilidade
-
 
 +!removecardfromhand(CARD) :
 	true
@@ -120,16 +191,6 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 	.delete(CARD,MYCARDS,NEWCARDS);		
 	+mycards(NEWCARDS);
 	.
-	
-+!removecardfromtable(CARD) :
-	true
-	<-
-	?cardstable(X);
-	-cardstable(X);
-	.delete(CARD,X,NEWCARDS);	
-	+cardstable(NEWCARDS);	
-	.print(removendo, CARD);
-	.
 
 +!drophand(card(NAIPE,NUMBER)):
 	true
@@ -138,26 +199,24 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 	dropcard(NAIPE,NUMBER);
 	.
 
-+cardusedtocollect(AGENT,NP,NB):
-  	my_name(AGENT)
-  	<-
-  	?cardsused(Y);
-	-cardsused(Y);
-	+cardsused([card(NP,NB)|Y]);	
-	.
+//+cardusedtocollect(AGENT,NP,NB):
+//  	true
+//  	<-
+//  	?cardsused(Y);
+//	-cardsused(Y);
+//	+cardsused([card(NP,NB)|Y]);	
+//	.
 
 +cardontable(NAIPE,NUMBER):
-	true
+	cardstable(TABLE)
 	<-
-	?cardstable(X);
-	-cardstable(X);
-	+cardstable([card(NAIPE,NUMBER)|X]);
+	-+cardstable([card(NAIPE,NUMBER)|TABLE]);	
 	.
 
 -cardontable(NAIPE,NUMBER):
-	true
-	<-
-	!removecardfromtable(card(NAIPE,NUMBER));	
+	cardstable(TABLE) & .delete(card(NAIPE,NUMBER), TABLE, NEWTABLE) 
+	<-	
+	-+cardstable(NEWTABLE);	
 //	?cardsused(Y);
 //	-cardsused(Y);
 //	+cardsused([card(NAIPE,NUMBER)|Y]);	
@@ -171,7 +230,6 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 	+mycards([card(NAIPE,NUMBER)|X]);
 	.
 		
-		
 +!start : 
 	true 
 	<-
@@ -181,9 +239,10 @@ desmembrarlista([card(NAIPE,NUMBER)|T], L, C):-desmembrarlista(T, L2, C) & L=[ca
 +playerturn(AG):
 	.my_name(AG)
 	<-
+	.print("Plata o Plomo!");
+	.wait(3000);	
 	?mycards(X);
 	?cardstable(Y);
-	.print(Y);
 	!play(X,Y);
 	.
 
