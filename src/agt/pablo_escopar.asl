@@ -103,6 +103,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 /* Plans */
 
 // Tentar fazer 15 pontos com 7 de ouros
+@collectquinzewithsetecoin[atomic]
 +!play(MYCARDS, TABLECARDS):
 	getseteouros(MYCARDS, CARD) &	 
 	collectcomcard(TABLECARDS, CARD, R) &		
@@ -114,6 +115,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 	
 // Tentar fazer 15 pontos com qualquer carta de ouros
+@collectquinzewithouros[atomic]
 +!play(MYCARDS, TABLECARDS):
 	getmaiorouros(MYCARDS, card(NAIPE,NUMBER)) &
 	NAIPE=coins &		
@@ -126,6 +128,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.	 
 	
 //Quando não conseguir fazer 15 pontos com cartas de ouros, tentar com as outras
+@collectanycards[atomic]
 +!play(MYCARDS, TABLECARDS):
 	collect(TABLECARDS, R) &
 	desmembrarlista(R, L, C) 
@@ -136,6 +139,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 
 //Jogar maior carta na mesa (quando a soma de pontos na mesa for > 7) *** NÃO PODE JOGAR 7 E 6 E NÃO JOGAR OUROS***
+@discardmaiorcardtomesanaosixsete[atomic]
 +!play(MYCARDS, TABLECARDS):
 	countpoints(TABLECARDS, POINTS) & 
 	POINTS > 7 &
@@ -146,6 +150,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 
 //Jogar menor carta na mesa (quando a soma de pontos na mesa for <= 7) *** NÃO PODE JOGAR 7 E 6 E NÃO JOGAR OUROS***
+@discardmenorcardtomesanaosixsete[atomic]
 +!play(MYCARDS, TABLECARDS):
 	countpoints(TABLECARDS, POINTS) &
 	POINTS <= 7 &
@@ -156,6 +161,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 
 //Jogar maior carta na mesa (quando a soma de pontos na mesa for > 7) *** NÃO PODE JOGAR 7 E 6 ***
+@discardmaiorcardtomesa[atomic]
 +!play(MYCARDS, TABLECARDS):
 	countpoints(TABLECARDS, POINTS) & 
 	POINTS > 7 &
@@ -166,6 +172,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 	
 //Jogar menor carta na mesa (quando a soma de pontos na mesa for <= 7) *** NÃO PODE JOGAR 7 E 6 ***
+@discardmenorcardtomesa[atomic]
 +!play(MYCARDS, TABLECARDS):
 	countpoints(TABLECARDS, POINTS) &
 	POINTS <= 7 &
@@ -176,6 +183,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.
 
 //Jogar qualquer
+@discardanycard[atomic]
 +!play(MYCARDS, TABLECARDS):
 	getqualquer(MYCARDS, CARD)
 	<-
@@ -183,6 +191,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	!drophand(CARD);
 	.
 
+@removecardfromhand[atomic]
 +!removecardfromhand(CARD) :
 	true
 	<-
@@ -192,6 +201,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	+mycards(NEWCARDS);
 	.
 
+@dropcardtotable[atomic]
 +!drophand(card(NAIPE,NUMBER)):
 	true
 	<-
@@ -207,12 +217,14 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 //	+cardsused([card(NP,NB)|Y]);	
 //	.
 
+@addtotable[atomic]
 +cardontable(NAIPE,NUMBER):
 	cardstable(TABLE)
 	<-
 	-+cardstable([card(NAIPE,NUMBER)|TABLE]);	
 	.
 
+@removefromtable[atomic]
 -cardontable(NAIPE,NUMBER):
 	cardstable(TABLE) & .delete(card(NAIPE,NUMBER), TABLE, NEWTABLE) 
 	<-	
@@ -222,6 +234,7 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 //	+cardsused([card(NAIPE,NUMBER)|Y]);	
 	.
 
+@addtohand[atomic]
 +hand(card(NAIPE,NUMBER)):
 	true
 	<-	
@@ -236,11 +249,12 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	join;
 	.
 
+@playerturn[atomic]
 +playerturn(AG):
 	.my_name(AG)
 	<-
 	.print("Plata o Plomo!");
-	.wait(3000);	
+//	.wait(3000);	
 	?mycards(X);
 	?cardstable(Y);
 	!play(X,Y);
