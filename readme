@@ -27,6 +27,7 @@ The delay time is the only one parameter of the constructor.
 3 - Descartar primeiro as cartas que não são de ouros. Descartar cartas que são de ouros caso outras cartas facilitem a acontecer escopa.
 4 - Anotar todas as cartas que foram utilizadas e as que estiverem em jogo para ponderar com os itens 2 e 3.
 
+Usar .count
 
 
 

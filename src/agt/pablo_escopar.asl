@@ -97,6 +97,24 @@ getmenorcardnotsixsete(MYCARDS,CARD):-false.
 getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-getmenorcardnotsixsete(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
 getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 
+getmenorcardnotouro(MYCARDS,CARD):-getmenorcard(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
+getmenorcardnotouro(MYCARDS,CARD):-false.
+
+getmaiorcardnotouro(MYCARDS,CARD):-getmaiorcard(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
+getmaiorcardnotouro(MYCARDS,CARD):-false.
+
+collectcomusedcards(CARD, TABLECARDS, R):-
+	mycards(CARDS) &	
+	.member(card(NP,N), CARDS) &	
+	L1 = [card(NP,N)] &
+	getnumber(N, NEWVALUE) &
+	cardsused(USED) &
+	.member(cards(NP2, N2), USED) &
+	getnumber(N2, NEWVALUE2) &
+	montar_lista(TABLECARDS, [card(NP2, N2)|L1], NEWVALUE + NEWVALUE2, R) &
+	CARD = card(NP,N)	
+	.
+
 /* Initial goals */
 !start.
 
@@ -181,6 +199,44 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	.print(menor, CARD);
 	!drophand(CARD);
 	.
+	
+//Jogar maior carta na mesa que não seja de ouros
+@discardmaiorcardtomesanotouro[atomic]
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) &
+	POINTS > 7 &
+	getmaiorcardnotouro(MYCARDS, CARD)
+	<-
+	.print(maiornotouro, CARD);
+	!drophand(CARD);
+	.
+
+//Jogar menor carta na mesa que não seja de ouros
+@discardmenorcardtomesanotouro[atomic]
++!play(MYCARDS, TABLECARDS):
+	countpoints(TABLECARDS, POINTS) &
+	POINTS <= 7 &
+	getmenorcardnotouro(MYCARDS, CARD)
+	<-
+	.print(menornotouro, CARD);
+	!drophand(CARD);
+	.
+
+//Descartar a carta com menor probabilidade do adversário fazer escopa
+//Essa intenção vai pegar a carta da minha mão que tiver a maior quantidade de possibilidades de fazer 15 pontos 
+//usando uma carta que não está mais em jogo
+@discardcardnotescopa[atomic]
++!play(MYCARDS, TABLECARDS):
+	C1 = .count(collectcomusedcards(card(NP1,NB1), TABLECARDS, R)) &
+	not (C2 = .count(collectcomusedcards(card(NP2,NB2), TABLECARDS, R2)) &
+		(C2 > C1)) &
+	C1 > 0
+	<-
+	.print(c1, C1);
+	.print(c2, C2);
+	.print(cardnotescopa, card(NP1,NB1));
+	!drophand(card(NP1, NB1));
+	.
 
 //Jogar qualquer
 @discardanycard[atomic]
@@ -209,13 +265,21 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 	dropcard(NAIPE,NUMBER);
 	.
 
-//+cardusedtocollect(AGENT,NP,NB):
-//  	true
-//  	<-
-//  	?cardsused(Y);
-//	-cardsused(Y);
-//	+cardsused([card(NP,NB)|Y]);	
-//	.
+@addtocardused[atomic]
++!addcardused(card(NAIPE,NUMBER)):
+	true
+	<-
+	?cardsused(Y);
+	-cardsused(Y);
+	+cardsused([card(NAIPE,NUMBER)|Y]);
+	.
+
+@cardusedtocollect[atomic]
++cardusedtocollect(AGENT,NP,NB):
+  	true
+  	<-  	
+	!addcardused(card(NP,NB));	
+	.
 
 @addtotable[atomic]
 +cardontable(NAIPE,NUMBER):
@@ -228,10 +292,8 @@ getmenorcardnotsixsetenaocoins(MYCARDS,CARD):-false.
 -cardontable(NAIPE,NUMBER):
 	cardstable(TABLE) & .delete(card(NAIPE,NUMBER), TABLE, NEWTABLE) 
 	<-	
-	-+cardstable(NEWTABLE);	
-//	?cardsused(Y);
-//	-cardsused(Y);
-//	+cardsused([card(NAIPE,NUMBER)|Y]);	
+	-+cardstable(NEWTABLE);
+	!addcardused(card(NAIPE,NUMBER));	
 	.
 
 @addtohand[atomic]
