@@ -49,7 +49,7 @@ collectcomcard(TABLECARDS, card(NAIPE, NUMBER), R):-
 	getnumber(NUMBER, N2) &
 	montar_lista(TABLECARDS, [card(NAIPE,NUMBER)], N2, R)
 	.
- 
+
 montar_lista(TABLECARDS, L, 15, R):-R=L.
 montar_lista(TABLECARDS, L, S, R):-	
 	.member(card(NP, N), TABLECARDS) &	 
@@ -103,16 +103,12 @@ getmenorcardnotouro(MYCARDS,CARD):-false.
 getmaiorcardnotouro(MYCARDS,CARD):-getmaiorcard(MYCARDS,card(NAIPE,NUMBER)) & (not NAIPE=coins) & CARD=card(NAIPE,NUMBER).
 getmaiorcardnotouro(MYCARDS,CARD):-false.
 
-collectcomusedcards(CARD, TABLECARDS, R):-
-	mycards(CARDS) &	
-	.member(card(NP,N), CARDS) &	
-	L1 = [card(NP,N)] &
+collectcomusedcards(card(NP,N), TABLECARDS, R):-
 	getnumber(N, NEWVALUE) &
 	cardsused(USED) &
-	.member(cards(NP2, N2), USED) &
+	.member(card(NP2, N2), USED) &
 	getnumber(N2, NEWVALUE2) &
-	montar_lista(TABLECARDS, [card(NP2, N2)|L1], NEWVALUE + NEWVALUE2, R) &
-	CARD = card(NP,N)	
+	montar_lista(TABLECARDS, [card(NP2, N2)|[card(NP,N)]], NEWVALUE + NEWVALUE2, R) 	
 	.
 
 /* Initial goals */
@@ -127,7 +123,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	collectcomcard(TABLECARDS, CARD, R) &		
 	desmembrarlista(R, L, C) 
 	<-
-	.print(comouros, R);	
+//	.print(comouros, R);	
 	!removecardfromhand(C);	
 	collectcards(C,L);	
 	.
@@ -140,7 +136,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	collectcomcard(TABLECARDS, card(NAIPE,NUMBER), R) &		
 	desmembrarlista(R, L, C) 
 	<-
-	.print(comouros, R);	
+//	.print(comouros, R);	
 	!removecardfromhand(C);	
 	collectcards(C,L);	
 	.	 
@@ -151,9 +147,29 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	collect(TABLECARDS, R) &
 	desmembrarlista(R, L, C) 
 	<-
-	.print(qualquer, R);	
+//	.print(qualquer, R);	
 	!removecardfromhand(C);
 	collectcards(C,L);		
+	.
+
+//Descartar a carta com menor probabilidade do adversário fazer escopa
+//Essa intenção vai pegar a carta da minha mão que tiver a maior quantidade de possibilidades de fazer 15 pontos 
+//usando uma carta que não está mais em jogo
+@discardcardnotescopa[atomic]
++!play(MYCARDS, TABLECARDS):
+	mycards(CARDS) &	
+	.member(card(NP1,NB1), CARDS) &
+	C1 = .count(collectcomusedcards(card(NP1,NB1), TABLECARDS, R)) &
+	not (
+		.member(card(NP2,NB2), CARDS) &
+		C2 = .count(collectcomusedcards(card(NP2,NB2), TABLECARDS, R2)) &
+		(C2 > C1)) &
+	C1 > 0
+	<-
+//	.print(c1, C1);
+//	.print(c2, C2);
+//	.print(cardnotescopa, card(NP1,NB1));
+	!drophand(card(NP1, NB1));
 	.
 
 //Jogar maior carta na mesa (quando a soma de pontos na mesa for > 7) *** NÃO PODE JOGAR 7 E 6 E NÃO JOGAR OUROS***
@@ -163,7 +179,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS > 7 &
 	getmaiorcardnotsixsetenaocoins(MYCARDS, CARD)
 	<-
-	.print(maiornaocoins, CARD);
+//	.print(maiornaocoins, CARD);
 	!drophand(CARD);
 	.
 
@@ -174,7 +190,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS <= 7 &
 	getmenorcardnotsixsetenaocoins(MYCARDS, CARD)
 	<-
-	.print(menornaocoins, CARD);
+//	.print(menornaocoins, CARD);
 	!drophand(CARD);
 	.
 
@@ -185,7 +201,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS > 7 &
 	getmaiorcardnotsixsete(MYCARDS, CARD)
 	<-
-	.print(maior, CARD);
+//	.print(maior, CARD);
 	!drophand(CARD);
 	.
 	
@@ -196,7 +212,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS <= 7 &
 	getmenorcardnotsixsete(MYCARDS, CARD)
 	<-
-	.print(menor, CARD);
+//	.print(menor, CARD);
 	!drophand(CARD);
 	.
 	
@@ -207,7 +223,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS > 7 &
 	getmaiorcardnotouro(MYCARDS, CARD)
 	<-
-	.print(maiornotouro, CARD);
+//	.print(maiornotouro, CARD);
 	!drophand(CARD);
 	.
 
@@ -218,24 +234,8 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 	POINTS <= 7 &
 	getmenorcardnotouro(MYCARDS, CARD)
 	<-
-	.print(menornotouro, CARD);
+//	.print(menornotouro, CARD);
 	!drophand(CARD);
-	.
-
-//Descartar a carta com menor probabilidade do adversário fazer escopa
-//Essa intenção vai pegar a carta da minha mão que tiver a maior quantidade de possibilidades de fazer 15 pontos 
-//usando uma carta que não está mais em jogo
-@discardcardnotescopa[atomic]
-+!play(MYCARDS, TABLECARDS):
-	C1 = .count(collectcomusedcards(card(NP1,NB1), TABLECARDS, R)) &
-	not (C2 = .count(collectcomusedcards(card(NP2,NB2), TABLECARDS, R2)) &
-		(C2 > C1)) &
-	C1 > 0
-	<-
-	.print(c1, C1);
-	.print(c2, C2);
-	.print(cardnotescopa, card(NP1,NB1));
-	!drophand(card(NP1, NB1));
 	.
 
 //Jogar qualquer
@@ -243,7 +243,7 @@ collectcomusedcards(CARD, TABLECARDS, R):-
 +!play(MYCARDS, TABLECARDS):
 	getqualquer(MYCARDS, CARD)
 	<-
-	.print(descartarqualquer, CARD);
+//	.print(descartarqualquer, CARD);
 	!drophand(CARD);
 	.
 
