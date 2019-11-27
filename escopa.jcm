@@ -1,12 +1,6 @@
 mas espanhol {
     agent pablo_escopar {
-    	instances: 1
-		join: env
-		focus: env.v
-    }
-    
-    agent buda_agent {
-    	instances: 1
+    	instances: 2
 		join: env
 		focus: env.v
     }
