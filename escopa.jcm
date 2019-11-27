@@ -1,11 +1,17 @@
 mas espanhol {
     agent pablo_escopar {
-    	instances: 2
+    	instances: 1
+		join: env
+		focus: env.v
+    }
+    
+    agent buda_agent {
+    	instances: 1
 		join: env
 		focus: env.v
     }
     
     workspace env {
-		artifact v: model.Escopa(500)
+		artifact v: model.Escopa(100)
 	}
 }
